@@ -1,0 +1,37 @@
+plugins {
+    id 'corda.common-publishing'
+    id 'corda.common-library'
+}
+description 'Tracing'
+
+ext {
+    releasable = true
+}
+
+dependencies {
+    compileOnly 'org.osgi:osgi.annotation'
+    compileOnly 'org.osgi:osgi.core'
+    compileOnly 'org.osgi:org.osgi.service.component.annotations'
+
+    implementation platform("net.corda:corda-api:$cordaApiVersion")
+    api 'net.corda:corda-base'
+    api 'net.corda:corda-application'
+    implementation 'net.corda:corda-config-schema'
+    implementation 'org.jetbrains.kotlin:kotlin-osgi-bundle'
+    // Concluded this is the one acceptable dependency in addition to kotlin.
+    implementation 'org.slf4j:slf4j-api'
+
+    implementation project(":libs:configuration:configuration-core")
+
+    implementation(platform("io.micrometer:micrometer-tracing-bom:1.0.3"))
+    implementation("io.micrometer:micrometer-tracing")
+    implementation("io.micrometer:micrometer-tracing-bridge-brave")
+    implementation("io.zipkin.reporter2:zipkin-sender-urlconnection:2.16.3")
+    implementation("io.zipkin.brave:brave-instrumentation-servlet-jakarta:5.15.0")
+
+    testImplementation "org.assertj:assertj-core:$assertjVersion"
+    testImplementation "com.google.jimfs:jimfs:$jimfsVersion"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
+
+    testRuntimeOnly 'org.osgi:osgi.core'
+}

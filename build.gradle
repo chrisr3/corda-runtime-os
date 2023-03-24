@@ -129,6 +129,7 @@ allprojects {
         //  module (e.g in corda-api repo).
         //  This would ensure that the local copy is picked up if it is available.
         mavenLocal()
+        mavenCentral()
 
         maven {
             url = "$artifactoryContextUrl/corda-dependencies-dev"
