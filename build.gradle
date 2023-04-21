@@ -199,7 +199,7 @@ allprojects {
                 }
             }
 
-            // NOTE: this block needs to be removed once Micrometer release 1.11.0 
+            // NOTE: this block needs to be removed once Micrometer release 1.11.0
             // and code in this project is updated to use this version rather than the forked version.
             exclusiveContent {
                 forRepository {
@@ -208,7 +208,11 @@ allprojects {
                     }
                 }
                 filter {
-                    includeGroup 'net.corda.micrometer'
+//                    includeGroup 'net.corda.micrometer'
+                    includeModule('io.micrometer', 'micrometer-core')
+                    includeModule('io.micrometer', 'micrometer-registry-prometheus')
+                    includeModule('io.micrometer', 'micrometer-commons')
+//                    includeModule('io.micrometer', 'micrometer-observation')
                 }
             }
         }
