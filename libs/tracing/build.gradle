@@ -19,7 +19,8 @@ dependencies {
     implementation 'net.corda:corda-config-schema'
     implementation 'org.jetbrains.kotlin:kotlin-osgi-bundle'
     // Concluded this is the one acceptable dependency in addition to kotlin.
-    implementation 'org.slf4j:slf4j-api'
+//    implementation 'org.slf4j:slf4j-api'
+    implementation "org.slf4j:slf4j-api:$slf4jVersion"
 
     implementation project(":libs:configuration:configuration-core")
 
@@ -33,9 +34,9 @@ dependencies {
 //    implementation "org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0"
 //    implementation platform("io.micrometer:micrometer-tracing-bom:1.0.3")
 
-    implementation("org.apache.logging.log4j:log4j-api:2.20.0")
-    implementation("org.apache.logging.log4j:log4j-core:2.20.0")
-    implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0")
+//    implementation("org.apache.logging.log4j:log4j-api:2.20.0")
+//    implementation("org.apache.logging.log4j:log4j-core:2.20.0")
+//    implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0")
     implementation("io.zipkin.reporter2:zipkin-sender-urlconnection:2.16.3")
     implementation("io.zipkin.brave:brave-context-slf4j:5.15.0")
     implementation("io.zipkin.brave:brave-instrumentation-kafka-clients:5.15.0")
