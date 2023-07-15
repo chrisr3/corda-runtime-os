@@ -60,4 +60,6 @@ public interface EmbeddedNodeService {
     void setGroupParameters(@NotNull @Unmodifiable Set<@NotNull KeyValuePair> groupParameters);
 
     void setMembershipGroup(@NotNull @Unmodifiable Map<@NotNull MemberX500Name, @NotNull KeyPair> network);
+
+    void flush();
 }

@@ -2,18 +2,23 @@
 package net.corda.testing.driver.impl
 
 import aQute.bnd.header.OSGiHeader
+import co.paralleluniverse.fibers.instrument.QuasarInstrumentor
+import com.sun.management.HotSpotDiagnosticMXBean
 import java.io.IOException
+import java.lang.management.ManagementFactory
 import java.net.URI
 import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Path
 import java.security.KeyPair
 import java.time.Duration
+import java.time.Instant
 import java.util.IdentityHashMap
 import java.util.ServiceLoader
 import java.util.Collections.unmodifiableMap
 import java.util.Collections.unmodifiableSet
 import java.util.concurrent.TimeoutException
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.jar.JarFile.MANIFEST_NAME
 import java.util.jar.Manifest
 import net.corda.data.KeyValuePair
@@ -37,6 +42,7 @@ import org.osgi.framework.Bundle
 import org.osgi.framework.Bundle.RESOLVED
 import org.osgi.framework.Bundle.STARTING
 import org.osgi.framework.BundleException
+import org.osgi.framework.BundleReference
 import org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME
 import org.osgi.framework.Constants.EXPORT_PACKAGE
 import org.osgi.framework.Constants.FRAMEWORK_STORAGE
@@ -47,6 +53,7 @@ import org.osgi.framework.InvalidSyntaxException
 import org.osgi.framework.launch.FrameworkFactory
 import org.osgi.framework.wiring.BundleRevision
 import org.osgi.framework.wiring.BundleRevision.TYPE_FRAGMENT
+import org.osgi.framework.wiring.BundleWiring
 import org.osgi.framework.wiring.FrameworkWiring
 import org.slf4j.LoggerFactory
 import org.slf4j.bridge.SLF4JBridgeHandler
@@ -60,6 +67,7 @@ internal class DriverDSLImpl(
         private const val CORDA_API_ATTRIBUTE = "Corda-Api"
         private const val JAR_PROTOCOL = "jar"
         private const val PAUSE_MILLIS = 100L
+        private const val MAX_PAUSES = 200
         private const val QUASAR_CACHE_LOCATIONS = "FLOW/*"
 
         private val TIMEOUT = Duration.ofSeconds(60)
@@ -341,6 +349,13 @@ internal class DriverDSLImpl(
         }
     }
 
+    private val mxBean = ManagementFactory.newPlatformMXBeanProxy(
+        ManagementFactory.getPlatformMBeanServer(),
+        "com.sun.management:type=HotSpotDiagnostic",
+        HotSpotDiagnosticMXBean::class.java
+    )
+    private val counter = AtomicInteger()
+
     private val virtualNodeInfo = mutableMapOf<VirtualNodeKey, VirtualNodeInfo>()
     private val driverFramework = createDriverFramework()
 
@@ -363,6 +378,7 @@ internal class DriverDSLImpl(
                 "co.paralleluniverse.quasar.cacheLocations" to QUASAR_CACHE_LOCATIONS,
                 "co.paralleluniverse.quasar.excludeLocations" to quasarExcludeLocations,
                 "co.paralleluniverse.quasar.excludePackages" to quasarExcludePackages,
+                "co.paralleluniverse.quasar.service" to true.toString(),
                 "co.paralleluniverse.quasar.verbose" to false.toString(),
                 FRAMEWORK_STORAGE to frameworkDirectory.toString(),
                 FRAMEWORK_STORAGE_CLEAN to FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT,
@@ -446,8 +462,66 @@ internal class DriverDSLImpl(
         groupFor(anyMemberNode, action)
     }
 
+    override fun flushCaches() {
+        driverFramework.getService(EmbeddedNodeService::class.java, null, TIMEOUT)
+            .andAlso(EmbeddedNodeService::flush)
+    }
+
+    override fun dumpHeap(tag: String) {
+        val dumpFileName = "demo-${Instant.now().epochSecond}-${counter.incrementAndGet()}-$tag.hprof"
+        mxBean.dumpHeap(dumpFileName, true)
+    }
+
     @Throws(InterruptedException::class)
     override fun close() {
+        flushCaches()
+        driverFramework.getService(QuasarInstrumentor::class.java, null, TIMEOUT).andAlso { instrumentor ->
+            logger.info("Instrumentor: {}", instrumentor::class.java)
+            val dbField = instrumentor::class.java.getDeclaredField("dbForClassloader").apply {
+                isAccessible = true
+            }
+
+            @Suppress("unchecked_cast")
+            val classLoaders = (dbField.get(instrumentor) as Map<ClassLoader, *>).keys
+
+            val targetSize = countNonSandboxBundles(classLoaders)
+            var count = 0
+            while (classLoaders.size > targetSize && ++count <= MAX_PAUSES) {
+                @Suppress("ExplicitGarbageCollectionCall")
+                System.gc()
+                Thread.sleep(PAUSE_MILLIS)
+            }
+
+            for (classLoader in classLoaders) {
+                if (classLoader is BundleReference) {
+                    val bundle = classLoader.bundle
+                    if (bundle == null) {
+                        logger.info("CLASSLOADER>> {} is DEAD", classLoader)
+                    } else if (bundle.isSandbox) {
+                        logger.info(
+                            "BUNDLE>> {} is-in-use={} (classloader={})",
+                            bundle, bundle.adapt(BundleWiring::class.java)?.isInUse, classLoader::class.java
+                        )
+                        instrumentor.getMethodDatabase(classLoader)?.also { database ->
+                            val classes = database.classNames
+                            val superClasses = database.classNamesForSuperClasses
+                            logger.info(
+                                "--- method database[{}][{}]: classes.size={}, superClasses.size={}",
+                                bundle.symbolicName, bundle.bundleId, classes.size, superClasses.size
+                            )
+                        }
+                    }
+                }
+            }
+            instrumentor.getMethodDatabase(ClassLoader.getPlatformClassLoader())?.also { database ->
+                val classes = database.classNames
+                logger.info(
+                    "--- bootstrap method database: classes.size={}, superClasses.size={}",
+                    classes.size, database.classNamesForSuperClasses.size
+                )
+            }
+        }
+
         driverFramework.close()
     }
 }
@@ -471,8 +545,17 @@ private class ServiceImpl<T : Any>(
     override fun toString(): String = service.toString()
 }
 
+private fun countNonSandboxBundles(classLoaders: Iterable<ClassLoader>): Int {
+    return classLoaders.filter { cl ->
+        cl !is BundleReference || cl.bundle.let { it == null || !it.isSandbox }
+    }.size
+}
+
 private val Bundle.isFragment: Boolean
     get() = (adapt(BundleRevision::class.java).types and TYPE_FRAGMENT) != 0
+
+private val Bundle.isSandbox: Boolean
+    get() = location.let { it.startsWith("FLOW/") || it.startsWith("PERSISTENCE/") || it.startsWith("VERIFICATION/") }
 
 private val URL.fileURI: URI
     get() {

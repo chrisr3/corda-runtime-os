@@ -55,4 +55,8 @@ public interface DriverDSL {
         @NotNull String groupName,
         @NotNull ThrowingConsumer<@NotNull MembershipGroupDSL> action
     );
+
+    void flushCaches();
+
+    void dumpHeap(@NotNull String tag);
 }

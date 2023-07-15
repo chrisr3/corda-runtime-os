@@ -238,9 +238,26 @@ class CordaVNode @Activate constructor(
                         if (bundle == null) {
                             logger.info("CLASSLOADER>> {} is DEAD", classLoader)
                         } else if (bundle.location.startsWith("FLOW/")) {
-                            logger.info("BUNDLE>> {} is-in-use={} (classloader={})",
-                                bundle, bundle.adapt(BundleWiring::class.java)?.isInUse, classLoader::class.java)
+                            logger.info(
+                                "BUNDLE>> {} is-in-use={} (classloader={})",
+                                bundle, bundle.adapt(BundleWiring::class.java)?.isInUse, classLoader::class.java
+                            )
+                            instrumentor.getMethodDatabase(classLoader)?.also { database ->
+                                val classes = database.classNames
+                                val superClasses = database.classNamesForSuperClasses
+                                logger.info(
+                                    "--- method database[{}][{}]: classes.size={}, superClasses.size={}",
+                                    bundle.symbolicName, bundle.bundleId, classes.size, superClasses.size
+                                )
+                            }
                         }
+                    }
+                    instrumentor.getMethodDatabase(null)?.also { database ->
+                        val classes = database.classNames
+                        logger.info(
+                            "--- bootstrap method database: classes.size={}, superClasses.size={}",
+                            classes.size, database.classNamesForSuperClasses.size
+                        )
                     }
                 }
             }

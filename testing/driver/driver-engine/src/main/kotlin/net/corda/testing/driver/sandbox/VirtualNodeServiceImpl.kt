@@ -18,6 +18,7 @@ interface VirtualNodeService {
     fun unloadVirtualNode(completion: CompletableFuture<*>)
 
     fun loadSystemNodes(names: Set<MemberX500Name>, resourceName: String): List<VirtualNodeInfo>
+    fun flush()
 }
 
 @Suppress("unused")
@@ -71,5 +72,10 @@ class VirtualNodeServiceImpl @Activate constructor(
             @Suppress("ExplicitGarbageCollectionCall")
             System.gc()
         } while (!sandboxGroupContextComponent.waitFor(completion, ONE_SECOND))
+    }
+
+    override fun flush() {
+        val completion = sandboxGroupContextComponent.flushCache()
+        unloadVirtualNode(completion)
     }
 }

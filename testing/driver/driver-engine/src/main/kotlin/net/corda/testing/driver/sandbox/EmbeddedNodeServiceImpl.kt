@@ -211,4 +211,8 @@ class EmbeddedNodeServiceImpl @Activate constructor(
             config.update(properties)
         }
     }
+
+    override fun flush() {
+        virtualNodeService.flush()
+    }
 }
