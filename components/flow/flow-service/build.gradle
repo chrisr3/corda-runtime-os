@@ -57,6 +57,7 @@ dependencies {
     implementation "net.corda:corda-topic-schema"
     implementation 'org.jetbrains.kotlin:kotlin-osgi-bundle'
     implementation "org.slf4j:slf4j-api:$slf4jVersion"
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion"
 
     implementation "co.paralleluniverse:quasar-core-osgi:$quasarVersion"
     implementation "com.esotericsoftware:kryo:$kryoVersion"
@@ -65,7 +66,6 @@ dependencies {
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
     testImplementation "org.apache.felix:org.apache.felix.framework:$felixVersion"
-    testImplementation "com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion"
 
     testImplementation project(":libs:flows:session-manager-impl")
     testImplementation project(":libs:lifecycle:lifecycle-test-impl")
