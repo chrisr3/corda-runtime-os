@@ -66,4 +66,20 @@ class SimWithJsonSigningService(private val keyStore: SimKeyStore) : SigningServ
         }
         return keyMap
     }
+
+    override fun signWithMyKeys(
+        bytes: ByteArray,
+        keys: MutableSet<PublicKey>,
+        signatureSpec: SignatureSpec
+    ): MutableSet<DigitalSignature.WithKeyId> {
+        TODO("Not yet implemented")
+    }
+
+    override fun signWithMyCategoryKeys(
+        bytes: ByteArray,
+        category: String,
+        signatureSpec: SignatureSpec
+    ): MutableSet<DigitalSignature.WithKeyId> {
+        TODO("Not yet implemented")
+    }
 }
