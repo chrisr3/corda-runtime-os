@@ -1,0 +1,108 @@
+{
+  "contractName": "test",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "bool_output",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "bigint_output",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },{
+      "inputs": [],
+      "name": "address_output",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "string_output",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "name": "bool_input",
+      "inputs": [
+        {
+          "internalType": "bool",
+          "name": "input",
+          "type": "bool"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "name": "bigint_input",
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "input",
+          "type": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "name": "address_input",
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "input",
+          "type": "address"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "name": "address_array_input",
+      "inputs": [
+        {
+          "internalType": "address[]",
+          "name": "input",
+          "type": "address[]"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ]
+}
