@@ -31,6 +31,7 @@ import net.corda.crypto.persistence.getEntityManagerFactory
 import net.corda.crypto.service.impl.TenantInfoServiceImpl
 import net.corda.crypto.service.impl.bus.CryptoFlowOpsBusProcessor
 import net.corda.crypto.service.impl.bus.CryptoOpsBusProcessor
+import net.corda.crypto.service.impl.bus.CryptoRekeyBusProcessor
 import net.corda.crypto.service.impl.bus.CryptoRewrapBusProcessor
 import net.corda.crypto.service.impl.bus.HSMRegistrationBusProcessor
 import net.corda.crypto.softhsm.TenantInfoService
@@ -122,6 +123,7 @@ class CryptoProcessorImpl @Activate constructor(
         const val RPC_OPS_SUBSCRIPTION = "RPC_OPS_SUBSCRIPTION"
         const val HSM_REG_SUBSCRIPTION = "HSM_REG_SUBSCRIPTION"
         const val REWRAP_SUBSCRIPTION = "REWRAP_SUBSCRIPTION"
+        const val REKEY_SUBSCRIPTION = "REKEY_SUBSCRIPTION"
     }
 
 
@@ -314,6 +316,7 @@ class CryptoProcessorImpl @Activate constructor(
         val rpcOpsProcessor = CryptoOpsBusProcessor(cryptoService, retryingConfig, keyEncodingService)
         val hsmRegistrationProcessor = HSMRegistrationBusProcessor(tenantInfoService, cryptoService, retryingConfig)
         val rewrapProcessor = CryptoRewrapBusProcessor(cryptoService)
+        val rekeyProcessor = CryptoRekeyBusProcessor(cryptoService)
         // now make and start the subscriptions
         val messagingConfig = event.config.getConfig(MESSAGING_CONFIG)
         val flowGroupName = "crypto.ops.flow"
@@ -376,8 +379,23 @@ class CryptoProcessorImpl @Activate constructor(
                 partitionAssignmentListener = null
             )
         }
-        logger.trace("Starting processing on $hsmRegGroupName ${Schemas.Crypto.REWRAP_MESSAGE_TOPIC}")
+        logger.trace("Starting processing on $rewrapGroupName ${Schemas.Crypto.REWRAP_MESSAGE_TOPIC}")
         coordinator.getManagedResource<SubscriptionBase>(REWRAP_SUBSCRIPTION)!!.start()
+
+        val rekeyGroupName = "crypto.ops.rekey"
+        coordinator.createManagedResource(REKEY_SUBSCRIPTION) {
+            subscriptionFactory.createDurableSubscription(
+                subscriptionConfig = SubscriptionConfig(
+                    groupName = rekeyGroupName,
+                    eventTopic = Schemas.Crypto.REKEY_MESSAGE_TOPIC
+                ),
+                processor = rekeyProcessor,
+                messagingConfig = messagingConfig,
+                partitionAssignmentListener = null
+            )
+        }
+        logger.trace("Starting processing on $rekeyGroupName ${Schemas.Crypto.REKEY_MESSAGE_TOPIC}")
+        coordinator.getManagedResource<SubscriptionBase>(REKEY_SUBSCRIPTION)!!.start()
     }
 
     private fun setStatus(status: LifecycleStatus, coordinator: LifecycleCoordinator) {
