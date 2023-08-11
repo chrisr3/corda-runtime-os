@@ -13,8 +13,8 @@ import net.corda.data.interop.evm.request.GetTransactionCount
 import net.corda.data.interop.evm.request.GetTransactionReceipt
 import net.corda.data.interop.evm.request.MaxPriorityFeePerGas
 import net.corda.data.interop.evm.request.SendRawTransaction
+import net.corda.flow.application.interop.external.events.EvmExternalEventParams
 import net.corda.flow.application.interop.external.events.EvmQueryExternalEventFactory
-import net.corda.flow.application.interop.external.events.EvmQueryExternalEventParams
 import net.corda.flow.external.events.executor.ExternalEventExecutor
 import net.corda.sandbox.type.UsedByFlow
 import net.corda.v5.application.crypto.SigningService
@@ -139,7 +139,7 @@ class EvmServiceImpl @Activate constructor(
             .build()
         val result = externalEventExecutor.execute(
             EvmQueryExternalEventFactory::class.java,
-            EvmQueryExternalEventParams(
+            EvmExternalEventParams(
                 contractAddress,
                 rpcUrl,
                 request

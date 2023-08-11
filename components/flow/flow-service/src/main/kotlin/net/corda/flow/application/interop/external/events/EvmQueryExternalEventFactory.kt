@@ -9,7 +9,7 @@ import net.corda.flow.state.FlowCheckpoint
 import net.corda.schema.Schemas
 import org.osgi.service.component.annotations.Component
 
-data class EvmQueryExternalEventParams(
+data class EvmExternalEventParams(
     val contractAddress: String,
     val rpcUrl: String,
     val payload: EvmRequest,
@@ -17,7 +17,7 @@ data class EvmQueryExternalEventParams(
 
 @Component(service = [ExternalEventFactory::class])
 class EvmQueryExternalEventFactory(
-    ) : ExternalEventFactory<EvmQueryExternalEventParams, EvmResponse, String> {
+    ) : ExternalEventFactory<EvmExternalEventParams, EvmResponse, String> {
     override val responseType: Class<EvmResponse> = EvmResponse::class.java
 
     override fun resumeWith(checkpoint: FlowCheckpoint, response: EvmResponse): String {
@@ -27,7 +27,7 @@ class EvmQueryExternalEventFactory(
     override fun createExternalEvent(
         checkpoint: FlowCheckpoint,
         flowExternalEventContext: ExternalEventContext,
-        parameters: EvmQueryExternalEventParams
+        parameters: EvmExternalEventParams
     ): ExternalEventRecord {
         return ExternalEventRecord(
             topic = Schemas.Interop.EVM_REQUEST,
