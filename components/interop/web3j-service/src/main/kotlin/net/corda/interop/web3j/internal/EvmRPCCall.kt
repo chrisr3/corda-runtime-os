@@ -8,13 +8,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.osgi.service.component.annotations.Reference
 
-/**
- * EvmRPCCall Class
- *
- * This class facilitates making RPC calls to an Ethereum node using the JSON-RPC protocol.
- *
- * @property httpClient The reference to the OkHttpClient service for making HTTP requests.
- */
+
 class EvmRPCCall(
     @Reference(service = OkHttpClient::class)
     private val httpClient: OkHttpClient

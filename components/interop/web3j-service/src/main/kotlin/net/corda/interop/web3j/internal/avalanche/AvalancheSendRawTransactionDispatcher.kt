@@ -5,6 +5,7 @@ import net.corda.data.interop.evm.EvmResponse
 import net.corda.data.interop.evm.request.SendRawTransaction
 import net.corda.interop.web3j.EvmDispatcher
 import net.corda.interop.web3j.internal.EthereumConnector
+import net.corda.interop.web3j.internal.NonEip1559BlockData
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.RawTransaction
 import org.web3j.service.TxSignServiceImpl

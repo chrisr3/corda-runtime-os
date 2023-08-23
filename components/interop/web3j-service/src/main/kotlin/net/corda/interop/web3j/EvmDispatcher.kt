@@ -3,13 +3,8 @@ package net.corda.interop.web3j
 import net.corda.data.interop.evm.EvmRequest
 import net.corda.data.interop.evm.EvmResponse
 
-/**
- * Defines the dispatch method that an EVM Dispatcher class must implement
- */
-interface EvmDispatcher {
-    /**
-     * Send an EVMRequest and retrieves an EVMResponse
-     *  @param evmRequest is a EVM Request defined in Corda API
-     */
-    fun dispatch(evmRequest: EvmRequest): EvmResponse
+interface EvmDispatcher{
+
+     fun dispatch(evmRequest: EvmRequest): EvmResponse
+
 }

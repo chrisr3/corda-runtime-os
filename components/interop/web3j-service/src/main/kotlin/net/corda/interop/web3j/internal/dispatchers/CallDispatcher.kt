@@ -7,12 +7,6 @@ import net.corda.data.interop.evm.request.Call
 import net.corda.interop.web3j.EvmDispatcher
 import net.corda.interop.web3j.internal.EthereumConnector
 
-
-/**
- * Dispatcher used to make call methods to a Generic EVM Node
- *
- * @param evmConnector The evmConnector class used to make rpc calls to the node
- */
 class CallDispatcher(val evmConnector: EthereumConnector): EvmDispatcher {
     override fun dispatch(evmRequest: EvmRequest): EvmResponse {
         val rootObject = JsonNodeFactory.instance.objectNode()

@@ -5,29 +5,17 @@ import net.corda.data.interop.evm.EvmResponse
 import net.corda.data.interop.evm.request.SendRawTransaction
 import net.corda.interop.web3j.EvmDispatcher
 import net.corda.interop.web3j.internal.EthereumConnector
+import net.corda.interop.web3j.internal.NonEip1559Block
+import net.corda.interop.web3j.internal.NonEip1559BlockData
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.RawTransaction
 import org.web3j.service.TxSignServiceImpl
 import org.web3j.utils.Numeric
 import java.math.BigInteger
 
-/**
- * Dispatcher used to send transaction.
- *
- * @param evmConnector The evmConnector class used to make rpc calls to the node
- */
 class SendRawTransactionDispatcher(val evmConnector: EthereumConnector) : EvmDispatcher {
 
     private val regularMaxFeePerGas = BigInteger.valueOf(515814755000)
-
-
-    // This is used in absence of the crypto worker being able to sign these transactions for use
-    private val temporaryPrivateKey = "0x8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63"
-
-    // This will be overridden in the config
-    private val genericGasLimit = "0x47b760"
-
-
     /**
      * Query the completion status of a contract using the Ethereum node.
      *
@@ -42,23 +30,26 @@ class SendRawTransactionDispatcher(val evmConnector: EthereumConnector) : EvmDis
 
 
     override fun dispatch(evmRequest: EvmRequest): EvmResponse {
+        // Send an RPC request to retrieve the maximum priority fee per gas.
         val sentTransaction = evmRequest.payload as SendRawTransaction
         val transactionCountResponse = evmConnector.send(
-            evmRequest.rpcUrl, "eth_getTransactionCount", listOf(evmRequest.from, "latest")
+            evmRequest.rpcUrl,
+            "eth_getTransactionCount",
+            listOf(evmRequest.from, "latest")
         )
         val nonce = BigInteger.valueOf(Integer.decode(transactionCountResponse.result.toString()).toLong())
 
         val chainId = evmConnector.send(evmRequest.rpcUrl, "eth_chainId", emptyList<String>())
         val parsedChainId = Numeric.toBigInt(chainId.result.toString()).toLong()
 
+
         val gasPrice = evmConnector.send(evmRequest.rpcUrl, "eth_gasPrice", emptyList<String>())
-        val maxPriorityFeePerGas =
-            47000 * Integer.decode(gasPrice.result.toString()) * sentTransaction.payload.toByteArray().size
+        val maxPriorityFeePerGas = 47000 * Integer.decode(gasPrice.result.toString()) * sentTransaction.payload.toByteArray().size
 
         val transaction = RawTransaction.createTransaction(
             parsedChainId,
             nonce,
-            BigInteger.valueOf(Numeric.toBigInt(genericGasLimit).toLong()),
+            BigInteger.valueOf(Numeric.toBigInt("0x47b760").toLong()),
             evmRequest.to,
             BigInteger.valueOf(0),
             sentTransaction.payload,
@@ -66,15 +57,17 @@ class SendRawTransactionDispatcher(val evmConnector: EthereumConnector) : EvmDis
             regularMaxFeePerGas
         )
 
-        val signer = Credentials.create(temporaryPrivateKey)
+        val signer = Credentials.create("0x8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63")
         val signed = TxSignServiceImpl(signer).sign(transaction, parsedChainId)
+        println("Passed Signing")
+        println(Numeric.toHexString(signed))
         val tReceipt =
             evmConnector.send(evmRequest.rpcUrl, "eth_sendRawTransaction", listOf(Numeric.toHexString(signed)))
         // Exception Case When Contract is Being Created we need to wait the address
         return if (evmRequest.to.isEmpty()) {
-            EvmResponse(evmRequest.flowId, queryCompletionContract(evmRequest.rpcUrl, tReceipt.result.toString()))
+            EvmResponse(evmRequest.flowId,queryCompletionContract(evmRequest.rpcUrl, tReceipt.result.toString()))
         } else {
-            EvmResponse(evmRequest.flowId, tReceipt.result.toString())
+            EvmResponse(evmRequest.flowId,tReceipt.result.toString())
         }
     }
 }

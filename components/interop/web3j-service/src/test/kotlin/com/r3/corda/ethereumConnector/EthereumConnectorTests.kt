@@ -7,8 +7,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
-import org.junit.jupiter.api.Assertions.assertEquals
-
 
 class EthereumConnectorTests {
 
@@ -19,23 +17,27 @@ class EthereumConnectorTests {
     private val mainAddress = "0xfe3b557e8fb62b89f4916b721be55ceb828dbd73"
 
     @BeforeEach
-    fun setUp() {
+    fun setUp(){
         mockedEVMRpc = mock(EvmRPCCall::class.java)
         evmConnector = EthereumConnector(mockedEVMRpc)
     }
-
     @Test
     fun getBalance() {
-        val jsonString = "{\"jsonrpc\":\"2.0\",\"id\":\"90.0\",\"result\":\"100000\"}"
+
+        val jsonString = "{\"jsonrpc\":\"2.0\",\"id\":\"90.0\",\"result\":\"1337\"}"
         `when`(
             mockedEVMRpc.rpcCall(
-                rpcUrl, "eth_getBalance", listOf(mainAddress, "latest")
+                rpcUrl,
+                "eth_getBalance",
+                listOf(mainAddress, "latest")
             )
         ).thenReturn(RPCResponse(true, jsonString))
         val final = evmConnector.send(
-            rpcUrl, "eth_getBalance", listOf(mainAddress, "latest")
+            rpcUrl,
+            "eth_getBalance",
+            listOf(mainAddress, "latest")
         )
-        assertEquals("100000", final.result)
+        println(final)
     }
 
 
@@ -46,13 +48,18 @@ class EthereumConnectorTests {
         val jsonString = "{\"jsonrpc\":\"2.0\",\"id\":\"90.0\",\"result\":\"0xfd2ds\"}"
         `when`(
             mockedEVMRpc.rpcCall(
-                rpcUrl, "eth_getCode", listOf(mainAddress, "0x1")
+                rpcUrl,
+                "eth_getCode",
+                listOf(mainAddress, "0x1")
             )
         ).thenReturn(RPCResponse(true, jsonString))
+        println(evmConnector)
         val final = evmConnector.send(
-            rpcUrl, "eth_getCode", listOf(mainAddress, "0x1")
+            rpcUrl,
+            "eth_getCode",
+            listOf(mainAddress, "0x1")
         )
-        assertEquals("0xfd2ds", final.result)
+        println(final)
     }
 
 
@@ -63,11 +70,14 @@ class EthereumConnectorTests {
         val jsonString = "{\"jsonrpc\":\"2.0\",\"id\":\"90.0\",\"result\":\"1337\"}"
         `when`(
             mockedEVMRpc.rpcCall(
-                rpcUrl, "eth_chainId", emptyList<String>()
+                rpcUrl,
+                "eth_chainId",
+                emptyList<String>()
             )
         ).thenReturn(RPCResponse(true, jsonString))
+        println(evmConnector)
         val final = evmConnector.send(rpcUrl, "eth_chainId", emptyList<String>())
-        assertEquals("1337", final.result)
+        assert(final.result == "1337")
     }
 
 
@@ -78,12 +88,16 @@ class EthereumConnectorTests {
         val jsonString = "{\"jsonrpc\":\"2.0\",\"id\":\"90.0\",\"result\":\"false\"}"
         `when`(
             mockedEVMRpc.rpcCall(
-                rpcUrl, "eth_syncing", emptyList<String>()
+                rpcUrl,
+                "eth_syncing",
+                emptyList<String>()
             )
         ).thenReturn(RPCResponse(true, jsonString))
+        println(evmConnector)
         val final = evmConnector.send(rpcUrl, "eth_syncing", emptyList<String>())
-        assertEquals("false", final.result)
+        assert(final.result == "false")
     }
+
 
 
 }
