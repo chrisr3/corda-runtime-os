@@ -6,6 +6,12 @@ import net.corda.interop.web3j.EvmDispatcher
 import net.corda.interop.web3j.internal.EthereumConnector
 import org.web3j.utils.Numeric
 
+
+/**
+ * Dispatcher used to call the Chain Id methods to a Generic EVM Node
+ *
+ * @param evmConnector The evmConnector class used to make rpc calls to the node
+ */
 class ChainIdDispatcher(val evmConnector: EthereumConnector): EvmDispatcher {
 
     override fun dispatch(evmRequest: EvmRequest): EvmResponse {
