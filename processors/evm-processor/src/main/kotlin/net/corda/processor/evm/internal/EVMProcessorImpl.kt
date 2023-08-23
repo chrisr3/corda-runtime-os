@@ -3,16 +3,21 @@ package net.corda.processors.evm.internal
 import net.corda.processors.db.EVMProcessor
 import net.corda.libs.configuration.SmartConfig
 import net.corda.lifecycle.*
+
 import net.corda.configuration.read.ConfigChangedEvent
 import net.corda.configuration.read.ConfigurationReadService
 import net.corda.libs.configuration.helper.getConfig
 import net.corda.schema.configuration.ConfigKeys.MESSAGING_CONFIG
+
 import net.corda.messaging.api.subscription.config.RPCConfig
 import net.corda.messaging.api.subscription.factory.SubscriptionFactory
+
+
 import org.osgi.service.component.annotations.Activate
 import org.osgi.service.component.annotations.Component
 import org.osgi.service.component.annotations.Reference
 import org.slf4j.LoggerFactory
+
 import net.corda.data.interop.evm.EvmRequest
 import net.corda.data.interop.evm.EvmResponse
 import net.corda.interop.web3j.internal.quorum.BesuDispatcherFactory
@@ -36,6 +41,8 @@ class EVMProcessorImpl @Activate constructor(
 
     private companion object {
         val log = LoggerFactory.getLogger(this::class.java.enclosingClass)
+
+//        const val CLIENT_ID_REST_PROCESSOR = "rest.processor"
     }
 
     private val dependentComponents = DependentComponents.of(
@@ -52,6 +59,8 @@ class EVMProcessorImpl @Activate constructor(
         log.info("EVM processor starting.")
         lifecycleCoordinator.start()
         lifecycleCoordinator.postEvent(BootConfigEvent(bootConfig))
+        // Wanted to put a state machine
+        // Posting on a single thread
 
     }
 
@@ -60,8 +69,15 @@ class EVMProcessorImpl @Activate constructor(
         lifecycleCoordinator.stop()
     }
 
+
+//    private fun startEthereumProcessor(config: SmartConfig) {
+//
+//    }
+
     private fun eventHandler(event: LifecycleEvent, coordinator: LifecycleCoordinator){
+        // work here
         log.info(event.toString())
+
         when (event){
             is StartEvent -> {
                 log.trace("EVM Processor starting")
