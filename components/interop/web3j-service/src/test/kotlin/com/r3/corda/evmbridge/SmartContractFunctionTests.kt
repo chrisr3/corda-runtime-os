@@ -28,10 +28,7 @@ class SmartContractFunctionTests {
     private val objectMapper = ObjectMapper().registerKotlinModule()
 
     // Change for each Ganache run
-    private val aliceAddress = "0x02643ed6819E63d022434b5a6de6E01C73Efe571"
     private val alicePrivateKey = "0xe5141a38133e1fd3d5e7ffac7641a139bdff4fc47d6a6b6ea6682959e489f51d"
-    private val bobAddress = "0xABEA411aAE92270aA3a1B2CA2C58B30fc791d3Bd"
-    private val bobPrivateKey = "0xf9c386a8e7867f80c2008936001bf55753f53913e41f19e3b71eb4f7dbb6e831"
     private val contractAddress = "0xe532fCd03EE17c89Cbac811444823A7d2FB94122"
 
     // DUMMY, NOT EVEN USED

@@ -17,11 +17,6 @@ data class ContractFunction(
     val outputs: List<ContractFunctionOutput>
 )
 
-data class ContractFunctionInput(
-    val name: String,
-    val type: String,
-    val value: Any?
-)
 
 data class ContractFunctionOutput(
     val type: String

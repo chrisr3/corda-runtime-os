@@ -55,8 +55,8 @@ public class Test extends Contract {
 
     public RemoteFunctionCall<BigInteger> retrieve() {
         final Function function = new Function(FUNC_RETRIEVE,
-                Arrays.<Type>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
+                Arrays.asList(),
+                Arrays.asList(new TypeReference<Uint256>() {}));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
