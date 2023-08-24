@@ -37,7 +37,8 @@ class EthereumConnector @Activate constructor(
             "eth_unsubscribe" to JsonRpcResponse::class.java,
             "eth_sendRawTransaction" to JsonRpcResponse::class.java,
             "eth_getBlockByNumber" to NonEip1559Block::class.java,
-        )
+            "eth_getCode" to JsonRpcResponse::class.java,
+            )
     }
 
 
