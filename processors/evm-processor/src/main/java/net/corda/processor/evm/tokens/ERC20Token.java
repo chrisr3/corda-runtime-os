@@ -260,10 +260,10 @@ public class ERC20Token extends Contract {
     public RemoteFunctionCall<TransactionReceipt> transferFrom(String from, String to, BigInteger amount) {
         final Function function = new Function(
                 FUNC_TRANSFERFROM,
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, from),
+                Arrays.asList(new org.web3j.abi.datatypes.Address(160, from),
                         new org.web3j.abi.datatypes.Address(160, to),
                         new org.web3j.abi.datatypes.generated.Uint256(amount)),
-                Collections.<TypeReference<?>>emptyList());
+                Collections.emptyList());
         return executeRemoteCallTransaction(function);
     }
 
