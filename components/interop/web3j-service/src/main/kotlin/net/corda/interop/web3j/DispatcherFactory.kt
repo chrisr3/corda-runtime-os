@@ -2,6 +2,10 @@ package net.corda.interop.web3j
 
 import net.corda.interop.web3j.internal.EthereumConnector
 
+
+/**
+ * Dispatcher Factory Defines the methods that must be implemented by any of the EVM Dispatchers
+ */
 interface DispatcherFactory {
     /**
      * Dispatcher used to make call methods to a EVM Node
