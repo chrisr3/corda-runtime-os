@@ -3,13 +3,13 @@ package net.corda.interop.web3j.internal.avalanche
 import net.corda.interop.web3j.DispatcherFactory
 import net.corda.interop.web3j.EvmDispatcher
 import net.corda.interop.web3j.internal.EthereumConnector
-import net.corda.interop.web3j.internal.avalanche.*
+import net.corda.interop.web3j.internal.besu.GetBalanceDispatcher
 
 
 object AvalancheDispatcherFactory : DispatcherFactory {
 
     override fun balanceDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
-        return AvalancheGetBalanceDispatcher(evmConnector)
+        return GetBalanceDispatcher(evmConnector)
     }
 
     override fun chainIdDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
@@ -29,7 +29,7 @@ object AvalancheDispatcherFactory : DispatcherFactory {
     }
 
     override fun getBalanceDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
-        return AvalancheGetBalanceDispatcher(evmConnector)
+        return GetBalanceDispatcher(evmConnector)
     }
 
     override fun getCodeDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
