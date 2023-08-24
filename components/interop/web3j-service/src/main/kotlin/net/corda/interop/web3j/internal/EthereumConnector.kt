@@ -7,18 +7,21 @@ import org.osgi.service.component.annotations.Activate
 import org.osgi.service.component.annotations.Reference
 
 
-
-
-
+/**
+ * EthereumConnector Class
+ *
+ * This class facilitates interaction with an Ethereum node's RPC interface. It enables making RPC requests,
+ * handling responses, and extracting useful data from those responses.
+ *
+ * @property evmRpc The reference to the EvmRPCCall service for making RPC calls to the Ethereum node.
+ */
 class EthereumConnector @Activate constructor(
     @Reference(service = EvmRPCCall::class)
     private val evmRpc: EvmRPCCall
 ) {
-
     companion object {
         private val objectMapper = ObjectMapper()
         private const val maxLoopedRequests = 10
-        // Expected return types
         private val expectedReturnTypes = mapOf(
             "eth_call" to JsonRpcResponse::class.java,
             "eth_chainId" to JsonRpcResponse::class.java,
@@ -36,10 +39,6 @@ class EthereumConnector @Activate constructor(
             "eth_getBlockByNumber" to NonEip1559Block::class.java,
         )
     }
-
-
-
-
 
 
     /**
@@ -66,12 +65,10 @@ class EthereumConnector @Activate constructor(
      * @param json The JSON string to be parsed.
      * @return The matching data class from candidateDataClasses, or null if no match is found.
      */
-    private fun findDataClassForJson(json: String,method: String): Class<*>? {
-        println("method $method")
-        return if (jsonStringContainsKey(json, "error")){
+    private fun findDataClassForJson(json: String, method: String): Class<*>? {
+        return if (jsonStringContainsKey(json, "error")) {
             JsonRpcError::class.java
-        }
-        else{
+        } else {
             expectedReturnTypes[method]
         }
     }
@@ -85,8 +82,6 @@ class EthereumConnector @Activate constructor(
     private fun returnUsefulData(input: Any): ProcessedResponse {
         when (input) {
             is JsonRpcError -> {
-                println("AT JSON RPC ERROR")
-                println(input)
                 throw EVMErrorException(input)
             }
 
@@ -103,7 +98,6 @@ class EthereumConnector @Activate constructor(
         }
         return ProcessedResponse(false, "")
     }
-
 
 
     /**
@@ -133,20 +127,14 @@ class EthereumConnector @Activate constructor(
         val success = response.success
         // Handle the response based on success status
         if (!success) {
-            println("Request Failed")
             return Response("90", "2.0", response.message)
         }
 
-        println("Response Body: $responseBody ")
-
-        // Find the appropriate data class for parsing the actual response
         val responseType = findDataClassForJson(
             responseBody,
             method
         )
-        // Parse the actual response using the determined data class
         val actualParsedResponse = objectMapper.readValue(responseBody, responseType ?: Any::class.java)
-        // Get the useful response data from the parsed response
         val usefulResponse = returnUsefulData(actualParsedResponse)
         if (usefulResponse.payload == null || usefulResponse.payload == "null" && waitForResponse) {
             TimeUnit.SECONDS.sleep(2)
