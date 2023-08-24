@@ -40,16 +40,8 @@ class EVMOpsProcessor
     private companion object {
         val log: Logger = LoggerFactory.getLogger(this::class.java.enclosingClass)
         private const val maxRetries = 3
-
-        // Make this cleaner using SECONDS
         private const val retryDelayMs = 1000L // 1 second
-
-        // Use the mapping to set retries and retryDelayMS
-        private val evmConnector = EthereumConnector(EvmRPCCall(OkHttpClient()))
         private val fixedThreadPool = Executors.newFixedThreadPool(20)
-
-        // Make a mapping to a textual description
-        // Have it as a map
         private val transientEthereumErrorCodes = listOf(
             -32000, -32005, -32010, -32016, -32002,
             -32003, -32004, -32007, -32008, -32009,
@@ -100,8 +92,6 @@ class EVMOpsProcessor
      * @param delayMs The Ethereum address for which to retrieve the balance.
      * @return The balance of the specified Ethereum address as a string.
      */
-
-    // Discuss whether the use of corda runtime exceptions is appropriate, or use something that inherits from them
     inner class RetryPolicy(private val maxRetries: Int, private val delayMs: Long) {
         fun execute(action: () -> Unit) {
             var retries = 0
