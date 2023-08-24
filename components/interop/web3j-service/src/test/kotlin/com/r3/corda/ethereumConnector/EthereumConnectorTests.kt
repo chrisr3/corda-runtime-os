@@ -7,6 +7,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
+import org.junit.jupiter.api.Assertions.assertEquals
+
 
 class EthereumConnectorTests {
 
@@ -17,14 +19,15 @@ class EthereumConnectorTests {
     private val mainAddress = "0xfe3b557e8fb62b89f4916b721be55ceb828dbd73"
 
     @BeforeEach
-    fun setUp(){
+    fun setUp() {
         mockedEVMRpc = mock(EvmRPCCall::class.java)
         evmConnector = EthereumConnector(mockedEVMRpc)
     }
+
     @Test
     fun getBalance() {
 
-        val jsonString = "{\"jsonrpc\":\"2.0\",\"id\":\"90.0\",\"result\":\"1337\"}"
+        val jsonString = "{\"jsonrpc\":\"2.0\",\"id\":\"90.0\",\"result\":\"100000\"}"
         `when`(
             mockedEVMRpc.rpcCall(
                 rpcUrl,
@@ -37,7 +40,7 @@ class EthereumConnectorTests {
             "eth_getBalance",
             listOf(mainAddress, "latest")
         )
-        println(final)
+        assertEquals("100000", final.result)
     }
 
 
@@ -53,13 +56,12 @@ class EthereumConnectorTests {
                 listOf(mainAddress, "0x1")
             )
         ).thenReturn(RPCResponse(true, jsonString))
-        println(evmConnector)
         val final = evmConnector.send(
             rpcUrl,
             "eth_getCode",
             listOf(mainAddress, "0x1")
         )
-        println(final)
+        assertEquals("0xfd2ds", final.result)
     }
 
 
@@ -75,9 +77,8 @@ class EthereumConnectorTests {
                 emptyList<String>()
             )
         ).thenReturn(RPCResponse(true, jsonString))
-        println(evmConnector)
         val final = evmConnector.send(rpcUrl, "eth_chainId", emptyList<String>())
-        assert(final.result == "1337")
+        assertEquals("1337", final.result)
     }
 
 
@@ -93,11 +94,9 @@ class EthereumConnectorTests {
                 emptyList<String>()
             )
         ).thenReturn(RPCResponse(true, jsonString))
-        println(evmConnector)
         val final = evmConnector.send(rpcUrl, "eth_syncing", emptyList<String>())
-        assert(final.result == "false")
+        assertEquals("false",final.result)
     }
-
 
 
 }
