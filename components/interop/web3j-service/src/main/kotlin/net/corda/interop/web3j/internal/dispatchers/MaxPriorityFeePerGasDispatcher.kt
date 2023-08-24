@@ -11,7 +11,7 @@ import net.corda.interop.web3j.internal.EthereumConnector
  * @param evmConnector The evmConnector class used to make rpc calls to the node
  */
 class MaxPriorityFeePerGasDispatcher(val evmConnector: EthereumConnector) : EvmDispatcher {
-fun dispatch(evmRequest: EvmRequest): EvmResponse {
+override fun dispatch(evmRequest: EvmRequest): EvmResponse {
         // Send an RPC request to retrieve the maximum priority fee per gas.
         val resp = evmConnector.send(evmRequest.rpcUrl, "eth_maxPriorityFeePerGas", emptyList<String>())
 
