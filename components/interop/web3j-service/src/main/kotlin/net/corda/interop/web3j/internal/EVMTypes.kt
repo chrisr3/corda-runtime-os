@@ -54,7 +54,7 @@ data class Response @JsonCreator constructor(
 data class TransactionResponse @JsonCreator constructor(
     @JsonProperty("id") val id: String,
     @JsonProperty("jsonrpc") val jsonrpc: String,
-    @JsonProperty("result") val result: TransactionData?
+    @JsonProperty("result") val result: TransactionData
 )
 
 data class TransactionData @JsonCreator constructor(

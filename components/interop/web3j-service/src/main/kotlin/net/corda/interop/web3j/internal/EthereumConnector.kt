@@ -3,6 +3,7 @@ package net.corda.interop.web3j.internal
 import com.fasterxml.jackson.databind.ObjectMapper
 import java.util.concurrent.TimeUnit
 import com.fasterxml.jackson.databind.JsonNode
+import net.corda.v5.base.exceptions.CordaRuntimeException
 import org.osgi.service.component.annotations.Activate
 import org.osgi.service.component.annotations.Reference
 
@@ -70,7 +71,7 @@ class EthereumConnector @Activate constructor(
         return if (jsonStringContainsKey(json, "error")) {
             JsonRpcError::class.java
         } else {
-            expectedReturnTypes[method]
+            expectedReturnTypes[method] ?: Any::class.java
         }
     }
 
@@ -80,24 +81,23 @@ class EthereumConnector @Activate constructor(
      * @param input The input data object to process.
      * @return The useful data extracted from the input as a string, or an empty string if not applicable.
      */
-    private fun returnUsefulData(input: Any): ProcessedResponse {
+    private fun returnUsefulData(input: Any): String {
         when (input) {
             is JsonRpcError -> {
                 throw EVMErrorException(input)
             }
-
             is TransactionResponse -> {
                 return try {
-                    ProcessedResponse(true, input.result?.contractAddress)
+                    input.result.contractAddress
                 } catch (e: Exception) {
-                    ProcessedResponse(true, input.result.toString())
+                    input.result.toString()
                 }
             }
 
-            is JsonRpcResponse -> return ProcessedResponse(true, input.result)
-            is NonEip1559Block -> return ProcessedResponse(true, input.result)
+            is JsonRpcResponse ->  input.result
+            is NonEip1559Block ->  input.result
         }
-        return ProcessedResponse(false, "")
+        throw CordaRuntimeException("Failed to find appropriate type")
     }
 
 
@@ -114,14 +114,9 @@ class EthereumConnector @Activate constructor(
     private fun makeRequest(
         rpcUrl: String,
         method: String,
-        params: List<*>,
-        waitForResponse: Boolean,
-        requests: Int
+        params: List<*>
     ): Response {
-        // Check if the maximum number of requests has been reached
-        if (requests > maxLoopedRequests) {
-            return Response("90", "2.0", "Timed Out")
-        }
+
         // Make the RPC call to the Ethereum node
         val response = evmRpc.rpcCall(rpcUrl, method, params)
         val responseBody = response.message
@@ -135,12 +130,9 @@ class EthereumConnector @Activate constructor(
             responseBody,
             method
         )
-        val actualParsedResponse = objectMapper.readValue(responseBody, responseType ?: Any::class.java)
+        val actualParsedResponse = objectMapper.readValue(responseBody, responseType)
         val usefulResponse = returnUsefulData(actualParsedResponse)
-        if (usefulResponse.payload == null || usefulResponse.payload == "null" && waitForResponse) {
-            TimeUnit.SECONDS.sleep(2)
-            return makeRequest(rpcUrl, method, params, true, requests + 1) // Return the recursive call
-        }
+
 
         return Response("90", "2.0", usefulResponse.payload)
     }
@@ -154,7 +146,7 @@ class EthereumConnector @Activate constructor(
      * @return A Response object representing the result of the RPC call.
      */
     fun send(rpcUrl: String, method: String, params: List<*>): Response {
-        return makeRequest(rpcUrl, method, params, waitForResponse = false, requests = 0)
+        return makeRequest(rpcUrl, method, params)
     }
 
     /**
@@ -167,7 +159,7 @@ class EthereumConnector @Activate constructor(
      * @return A Response object representing the result of the RPC call.
      */
     fun send(rpcUrl: String, method: String, params: List<*>, waitForResponse: Boolean): Response {
-        return makeRequest(rpcUrl, method, params, waitForResponse, requests = 0)
+        return makeRequest(rpcUrl, method, params)
     }
 
 }
