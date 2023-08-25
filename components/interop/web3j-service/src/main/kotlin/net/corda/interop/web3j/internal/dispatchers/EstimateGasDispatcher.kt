@@ -1,4 +1,4 @@
-package net.corda.interop.web3j.internal.besu
+package net.corda.interop.web3j.internal.dispatchers
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import net.corda.data.interop.evm.EvmRequest

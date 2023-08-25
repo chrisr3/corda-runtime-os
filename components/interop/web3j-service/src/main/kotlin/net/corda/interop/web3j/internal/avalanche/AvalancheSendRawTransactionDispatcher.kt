@@ -12,10 +12,14 @@ import org.web3j.utils.Numeric
 import java.math.BigInteger
 
 class AvalancheSendRawTransactionDispatcher(val evmConnector: EthereumConnector) : EvmDispatcher {
+    companion object {
+        private val avalancheGasLimit = BigInteger.valueOf(Numeric.toBigInt("0x47b760").toLong())
+        private val avalancheMaxPriorityFeePerGas = BigInteger.valueOf(0)
+        private val avalancheMaxFeePerGas = BigInteger.valueOf(515814755000)
+        private const val transactionSigner = "0x8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63"
+    }
 
-    private val avalanceGasLimit = BigInteger.valueOf(Numeric.toBigInt("0x47b760").toLong())
-    private val avalancheMaxPriorityFeePerGas = BigInteger.valueOf(0)
-    private val avalancheMaxFeePerGas = BigInteger.valueOf(515814755000)
+
     /**
      * Query the completion status of a contract using the Ethereum node.
      *
@@ -24,7 +28,7 @@ class AvalancheSendRawTransactionDispatcher(val evmConnector: EthereumConnector)
      * @return The JSON representation of the transaction receipt.
      */
     private fun queryCompletionContract(rpcConnection: String, transactionHash: String): String {
-        val resp = evmConnector.send(rpcConnection, "eth_getTransactionReceipt", listOf(transactionHash), true)
+        val resp = evmConnector.send(rpcConnection, "eth_getTransactionReceipt", listOf(transactionHash))
         return resp.result.toString()
     }
 
@@ -48,8 +52,7 @@ class AvalancheSendRawTransactionDispatcher(val evmConnector: EthereumConnector)
         val transaction = RawTransaction.createTransaction(
             parsedChainId,
             nonce,
-            // Seems appropriate for the hyperledger besu network
-            avalanceGasLimit,
+            avalancheGasLimit,
             evmRequest.to,
             BigInteger.valueOf(0),
             sentTransaction.payload,
@@ -57,7 +60,7 @@ class AvalancheSendRawTransactionDispatcher(val evmConnector: EthereumConnector)
             avalancheMaxFeePerGas
         )
 
-        val signer = Credentials.create("0x8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63")
+        val signer = Credentials.create(transactionSigner)
         val signed = TxSignServiceImpl(signer).sign(transaction, parsedChainId)
         val tReceipt =
             evmConnector.send(evmRequest.rpcUrl, "eth_sendRawTransaction", listOf(Numeric.toHexString(signed)))

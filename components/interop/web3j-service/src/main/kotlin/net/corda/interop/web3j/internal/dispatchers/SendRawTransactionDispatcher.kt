@@ -1,4 +1,4 @@
-package net.corda.interop.web3j.internal.besu
+package net.corda.interop.web3j.internal.dispatchers
 
 import net.corda.data.interop.evm.EvmRequest
 import net.corda.data.interop.evm.EvmResponse
@@ -36,7 +36,7 @@ class SendRawTransactionDispatcher(val evmConnector: EthereumConnector) : EvmDis
      * @return The JSON representation of the transaction receipt.
      */
     private fun queryCompletionContract(rpcConnection: String, transactionHash: String): String {
-        val resp = evmConnector.send(rpcConnection, "eth_getTransactionReceipt", listOf(transactionHash), true)
+        val resp = evmConnector.send(rpcConnection, "eth_getTransactionReceipt", listOf(transactionHash))
         return resp.result.toString()
     }
 

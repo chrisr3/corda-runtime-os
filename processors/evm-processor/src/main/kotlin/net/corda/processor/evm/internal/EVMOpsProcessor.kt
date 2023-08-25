@@ -70,7 +70,6 @@ class EVMOpsProcessor
 
 
     private fun handleRequest(request: EvmRequest, respFuture: CompletableFuture<EvmResponse>) {
-        log.info(request.schema.toString(true))
 
         dispatcher[request.payload::class]
             ?.dispatch(request).apply {
@@ -78,7 +77,6 @@ class EVMOpsProcessor
             }
             ?: {
                 val errorMessage = "Unregistered EVM operation: ${request.payload.javaClass}"
-                log.error (errorMessage)
                 throw CordaRuntimeException (errorMessage)
             }
     }

@@ -3,7 +3,7 @@ package net.corda.interop.web3j.internal.avalanche
 import net.corda.interop.web3j.DispatcherFactory
 import net.corda.interop.web3j.EvmDispatcher
 import net.corda.interop.web3j.internal.EthereumConnector
-import net.corda.interop.web3j.internal.besu.GetBalanceDispatcher
+import net.corda.interop.web3j.internal.dispatchers.GetBalanceDispatcher
 
 
 object AvalancheDispatcherFactory : DispatcherFactory {

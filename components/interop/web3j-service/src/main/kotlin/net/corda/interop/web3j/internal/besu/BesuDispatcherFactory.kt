@@ -1,9 +1,10 @@
-package net.corda.interop.web3j.internal.quorum
+package net.corda.interop.web3j.internal.besu
 
 import net.corda.interop.web3j.DispatcherFactory
 import net.corda.interop.web3j.EvmDispatcher
 import net.corda.interop.web3j.internal.EthereumConnector
-import net.corda.interop.web3j.internal.besu.*
+import net.corda.interop.web3j.internal.dispatchers.CallDispatcher
+import net.corda.interop.web3j.internal.dispatchers.ChainIdDispatcher
 
 object BesuDispatcherFactory : DispatcherFactory {
 

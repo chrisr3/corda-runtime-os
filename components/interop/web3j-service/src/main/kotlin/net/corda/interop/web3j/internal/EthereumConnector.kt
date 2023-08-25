@@ -1,11 +1,9 @@
 package net.corda.interop.web3j.internal
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import java.util.concurrent.TimeUnit
 import com.fasterxml.jackson.databind.JsonNode
 import net.corda.v5.base.exceptions.CordaRuntimeException
-import org.osgi.service.component.annotations.Activate
-import org.osgi.service.component.annotations.Reference
+
 
 
 /**
@@ -16,8 +14,7 @@ import org.osgi.service.component.annotations.Reference
  *
  * @property evmRpc The reference to the EvmRPCCall service for making RPC calls to the Ethereum node.
  */
-class EthereumConnector @Activate constructor(
-    @Reference(service = EvmRPCCall::class)
+class EthereumConnector (
     private val evmRpc: EvmRPCCall
 ) {
     companion object {
@@ -40,6 +37,12 @@ class EthereumConnector @Activate constructor(
             "eth_getBlockByNumber" to NonEip1559Block::class.java,
             "eth_getCode" to JsonRpcResponse::class.java,
             )
+
+        // requestId being sent, this is temporary
+        private const val requestId = "90"
+
+        // JSON RPC Version Being interacted with
+        private const val jsonRpcVersion = "2.0"
     }
 
 
@@ -67,7 +70,7 @@ class EthereumConnector @Activate constructor(
      * @param json The JSON string to be parsed.
      * @return The matching data class from candidateDataClasses, or null if no match is found.
      */
-    private fun findDataClassForJson(json: String, method: String): Class<*>? {
+    private fun findDataClassForJson(json: String, method: String): Class<*> {
         return if (jsonStringContainsKey(json, "error")) {
             JsonRpcError::class.java
         } else {
@@ -107,11 +110,9 @@ class EthereumConnector @Activate constructor(
      * @param rpcUrl The URL of the Ethereum RPC endpoint.
      * @param method The RPC method to call.
      * @param params The parameters for the RPC call.
-     * @param waitForResponse Set to true if the function should wait for a response, otherwise false.
-     * @param requests The number of requests made so far (used for recursive calls).
      * @return A Response object representing the result of the RPC call.
      */
-    private fun makeRequest(
+    private fun performRequest(
         rpcUrl: String,
         method: String,
         params: List<*>
@@ -123,7 +124,7 @@ class EthereumConnector @Activate constructor(
         val success = response.success
         // Handle the response based on success status
         if (!success) {
-            return Response("90", "2.0", response.message)
+            return Response(requestId, jsonRpcVersion, response.message)
         }
 
         val responseType = findDataClassForJson(
@@ -134,7 +135,7 @@ class EthereumConnector @Activate constructor(
         val usefulResponse = returnUsefulData(actualParsedResponse)
 
 
-        return Response("90", "2.0", usefulResponse.payload)
+        return Response(requestId, jsonRpcVersion, usefulResponse)
     }
 
     /**
@@ -146,20 +147,9 @@ class EthereumConnector @Activate constructor(
      * @return A Response object representing the result of the RPC call.
      */
     fun send(rpcUrl: String, method: String, params: List<*>): Response {
-        return makeRequest(rpcUrl, method, params)
+        return performRequest(rpcUrl, method, params)
     }
 
-    /**
-     * Sends an RPC request to the Ethereum node and returns the response.
-     *
-     * @param rpcUrl The URL of the Ethereum RPC endpoint.
-     * @param method The RPC method to call.
-     * @param params The parameters for the RPC call.
-     * @param waitForResponse Set to true if the function should wait for a response, otherwise false.
-     * @return A Response object representing the result of the RPC call.
-     */
-    fun send(rpcUrl: String, method: String, params: List<*>, waitForResponse: Boolean): Response {
-        return makeRequest(rpcUrl, method, params)
-    }
+
 
 }

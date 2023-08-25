@@ -4,7 +4,7 @@ import net.corda.data.interop.evm.EvmRequest
 import net.corda.data.interop.evm.EvmResponse
 import net.corda.interop.web3j.EvmDispatcher
 import net.corda.interop.web3j.internal.EthereumConnector
-import net.corda.interop.web3j.internal.besu.ChainIdDispatcher
+import net.corda.interop.web3j.internal.dispatchers.ChainIdDispatcher
 
 class AvalancheChainIdDispatcher(val evmConnector: EthereumConnector): EvmDispatcher {
 
