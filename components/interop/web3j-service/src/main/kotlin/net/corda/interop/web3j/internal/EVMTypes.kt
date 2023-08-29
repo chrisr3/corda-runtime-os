@@ -14,6 +14,11 @@ data class JsonRpcResponse @JsonCreator constructor(
 )
 
 
+
+
+
+
+
 data class JsonRpcError @JsonCreator constructor(
     @JsonProperty("jsonrpc") val jsonrpc: String,
     @JsonProperty("id") val id: String,
@@ -45,6 +50,9 @@ data class RPCResponse(
 )
 
 
+// Nullable transaction response
+
+
 data class Response @JsonCreator constructor(
     @JsonProperty("id") val id: String,
     @JsonProperty("jsonrpc") val jsonrpc: String,
@@ -54,7 +62,7 @@ data class Response @JsonCreator constructor(
 data class TransactionResponse @JsonCreator constructor(
     @JsonProperty("id") val id: String,
     @JsonProperty("jsonrpc") val jsonrpc: String,
-    @JsonProperty("result") val result: TransactionData
+    @JsonProperty("result") val result: TransactionData?
 )
 
 data class TransactionData @JsonCreator constructor(

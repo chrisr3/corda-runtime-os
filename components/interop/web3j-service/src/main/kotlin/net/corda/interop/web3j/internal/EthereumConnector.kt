@@ -1,9 +1,8 @@
 package net.corda.interop.web3j.internal
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.JsonNode
 import net.corda.v5.base.exceptions.CordaRuntimeException
-
+import java.util.concurrent.TimeUnit
 
 
 /**
@@ -14,7 +13,7 @@ import net.corda.v5.base.exceptions.CordaRuntimeException
  *
  * @property evmRpc The reference to the EvmRPCCall service for making RPC calls to the Ethereum node.
  */
-class EthereumConnector (
+class EthereumConnector(
     private val evmRpc: EvmRPCCall
 ) {
     companion object {
@@ -36,7 +35,7 @@ class EthereumConnector (
             "eth_sendRawTransaction" to JsonRpcResponse::class.java,
             "eth_getBlockByNumber" to NonEip1559Block::class.java,
             "eth_getCode" to JsonRpcResponse::class.java,
-            )
+        )
 
         // requestId being sent, this is temporary
         private const val requestId = "90"
@@ -55,8 +54,14 @@ class EthereumConnector (
      */
     private fun jsonStringContainsKey(jsonString: String, key: String): Boolean {
         return try {
-            val jsonNode: JsonNode = objectMapper.readTree(jsonString)
-            jsonNode.has(key)
+            // Regex to find the key
+//            val regex = """"$key":\s*""".toRegex()
+            val tree = objectMapper.readTree(jsonString)
+            tree.has(key)
+
+//            return
+//            // Check if the key is in the string
+//            regex.containsMatchIn(jsonString)
         } catch (e: Exception) {
             // Handle any parsing errors here
             false
@@ -85,20 +90,27 @@ class EthereumConnector (
      * @return The useful data extracted from the input as a string, or an empty string if not applicable.
      */
     private fun returnUsefulData(input: Any): String {
+        println("++++++++++++++=")
+        println(input is JsonRpcResponse)
         when (input) {
             is JsonRpcError -> {
                 throw EVMErrorException(input)
             }
+
             is TransactionResponse -> {
                 return try {
-                    input.result.contractAddress
+                    if (input.result == null) {
+                        "null"
+                    } else {
+                        input.result.contractAddress
+                    }
                 } catch (e: Exception) {
                     input.result.toString()
                 }
             }
 
-            is JsonRpcResponse ->  input.result
-            is NonEip1559Block ->  input.result
+            is JsonRpcResponse -> return input.result.toString()
+            is NonEip1559Block -> return input.result.toString()
         }
         throw CordaRuntimeException("Failed to find appropriate type")
     }
@@ -131,8 +143,17 @@ class EthereumConnector (
             responseBody,
             method
         )
+        println("Before actual parsed response")
+        println(method)
+        println(responseType)
+        println(responseBody)
         val actualParsedResponse = objectMapper.readValue(responseBody, responseType)
+        println("After actual parsed response")
         val usefulResponse = returnUsefulData(actualParsedResponse)
+        println("AFTER USEFUL Response $usefulResponse")
+        if (usefulResponse == "null") {
+            return performRequest(rpcUrl, method, params)
+        }
 
 
         return Response(requestId, jsonRpcVersion, usefulResponse)
@@ -149,7 +170,6 @@ class EthereumConnector (
     fun send(rpcUrl: String, method: String, params: List<*>): Response {
         return performRequest(rpcUrl, method, params)
     }
-
 
 
 }

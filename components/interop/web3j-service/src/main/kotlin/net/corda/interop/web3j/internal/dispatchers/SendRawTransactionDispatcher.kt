@@ -70,8 +70,10 @@ class SendRawTransactionDispatcher(val evmConnector: EthereumConnector) : EvmDis
         val signed = TxSignServiceImpl(signer).sign(transaction, parsedChainId)
         val tReceipt =
             evmConnector.send(evmRequest.rpcUrl, "eth_sendRawTransaction", listOf(Numeric.toHexString(signed)))
+        println("tReceipt $tReceipt")
         // Exception Case When Contract is Being Created we need to wait the address
         return if (evmRequest.to.isEmpty()) {
+            println("Minting transaction")
             EvmResponse(evmRequest.flowId, queryCompletionContract(evmRequest.rpcUrl, tReceipt.result.toString()))
         } else {
             EvmResponse(evmRequest.flowId, tReceipt.result.toString())

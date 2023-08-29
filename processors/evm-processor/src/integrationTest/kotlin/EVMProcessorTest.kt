@@ -7,7 +7,7 @@ import net.corda.data.interop.evm.request.GasPrice
 import net.corda.data.interop.evm.request.SendRawTransaction
 import net.corda.data.interop.evm.request.Syncing
 import net.corda.interop.web3j.internal.EVMErrorException
-import net.corda.interop.web3j.internal.avalanche.AvalancheDispatcherFactory
+import net.corda.interop.web3j.internal.besu.BesuDispatcherFactory
 import net.corda.processor.evm.internal.EVMOpsProcessor
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -21,8 +21,6 @@ import java.util.concurrent.ExecutionException
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-
-
 @EVMTest(type = NodeType.BESU)
 class EvmProcessorTest {
 
@@ -36,9 +34,9 @@ class EvmProcessorTest {
         "0xa9059cbb000000000000000000000000c5973ef0360fcd067dc5db140cd15b7e725c7c1a000000000000000000000000000000000000000000000000000000000000000a"
     private val transferWithInvalidParams = "0x095bcdb6000000000000000000000000c5973ef0360fcd067dc5db140cd15b7e725c7c1a000000000000000000000000000000000013426172c74d822b878fe80000000000000000000000000000000000000000000000000000000000000000000186a0"
     private val mainAddress = "0xfe3b557e8fb62b89f4916b721be55ceb828dbd73"
-    private val evmRpcUrl = "http://127.0.0.1:9658/ext/bc/C/rpc"
+    private val evmRpcUrl = "http://127.0.0.1:8545"
 
-    private val dispatcherFactory = AvalancheDispatcherFactory
+    private val dispatcherFactory = BesuDispatcherFactory
 
     @BeforeEach
     fun setUp() {
@@ -188,7 +186,7 @@ class EvmProcessorTest {
         val evmResponse = CompletableFuture<EvmResponse>()
         processor.onNext(evmRequest, evmResponse)
         val response = evmResponse.get()
-        assertEquals("0xcb95",response.payload)
+        assertEquals("0x5444",response.payload)
     }
 
     @Test

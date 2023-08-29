@@ -35,6 +35,8 @@ class EvmRPCCall(
      * @return An RPCResponse object representing the result of the RPC call.
      */
      fun rpcCall(rpcUrl: String, method: String, params: List<Any?>): RPCResponse {
+         println("method $method")
+         println("params $params")
         val body = RpcRequest(JSON_RPC_VERSION, "90.0", method, params)
         val requestBase = objectMapper.writeValueAsString(body)
         val requestBody = requestBase.toRequestBody("application/json".toMediaType())

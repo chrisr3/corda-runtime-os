@@ -16,12 +16,12 @@ class EstimateGasDispatcher(val evmConnector: EthereumConnector): EvmDispatcher 
     override fun dispatch(evmRequest: EvmRequest): EvmResponse {
         val rootObject = JsonNodeFactory.instance.objectNode()
 
-        rootObject.put("to", evmRequest.to.ifEmpty { evmRequest.from })
+        rootObject.put("to", evmRequest.from)
         rootObject.put("data", (evmRequest.payload as EstimateGas).payload.toString())
-        rootObject.put("input", (evmRequest.payload as EstimateGas).payload.toString())
+//        rootObject.put("input", (evmRequest.payload as EstimateGas).payload.toString())
         rootObject.put("from", evmRequest.from)
 
-        val resp = evmConnector.send(evmRequest.rpcUrl, "eth_estimateGas", listOf(rootObject, "latest"))
+        val resp = evmConnector.send(evmRequest.rpcUrl, "eth_estimateGas", listOf(rootObject))
         return EvmResponse(evmRequest.flowId, resp.result.toString())
     }
 }
