@@ -13,7 +13,7 @@ object AvalancheDispatcherFactory : DispatcherFactory {
     }
 
     override fun chainIdDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
-        return AvalancheChainIdDispatcher(evmConnector)
+        return chainIdDispatcher(evmConnector)
     }
 
     override fun callDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
@@ -21,11 +21,11 @@ object AvalancheDispatcherFactory : DispatcherFactory {
     }
 
     override fun estimateGasDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
-        return AvalancheEstimateGasDispatcher(evmConnector)
+        return estimateGasDispatcher(evmConnector)
     }
 
     override fun gasPriceDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
-        return AvalancheGasPriceDispatcher(evmConnector)
+        return gasPriceDispatcher(evmConnector)
     }
 
     override fun getBalanceDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
@@ -33,19 +33,19 @@ object AvalancheDispatcherFactory : DispatcherFactory {
     }
 
     override fun getCodeDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
-        return AvalancheGetCodeDispatcher(evmConnector)
+        return getCodeDispatcher(evmConnector)
     }
 
     override fun getTransactionByHashDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
-        return AvalancheGetTransactionByHashDispatcher(evmConnector)
+        return getTransactionByHashDispatcher(evmConnector)
     }
 
     override fun getTransactionByReceiptDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
-        return AvalancheGetTransactionReceiptDispatcher(evmConnector)
+        return getTransactionByReceiptDispatcher(evmConnector)
     }
 
     override fun isSyncingDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
-        return AvalancheIsSyncingDispatcher(evmConnector)
+        return isSyncingDispatcher(evmConnector)
     }
 
     override fun maxPriorityFeePerGasDispatcher(evmConnector: EthereumConnector): EvmDispatcher {

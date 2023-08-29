@@ -3,13 +3,12 @@ package net.corda.interop.web3j.internal.besu
 import net.corda.interop.web3j.DispatcherFactory
 import net.corda.interop.web3j.EvmDispatcher
 import net.corda.interop.web3j.internal.EthereumConnector
-import net.corda.interop.web3j.internal.dispatchers.CallDispatcher
-import net.corda.interop.web3j.internal.dispatchers.ChainIdDispatcher
+import net.corda.interop.web3j.internal.dispatchers.*
 
 object BesuDispatcherFactory : DispatcherFactory {
 
     override fun balanceDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
-        return CallDispatcher(evmConnector)
+        return getBalanceDispatcher(evmConnector)
     }
 
     override fun chainIdDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
@@ -17,35 +16,35 @@ object BesuDispatcherFactory : DispatcherFactory {
     }
 
     override fun callDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
-        return BesuCallDispatcher(evmConnector)
+        return CallDispatcher(evmConnector)
     }
 
     override fun estimateGasDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
-        return BesuEstimateGasDispatcher(evmConnector)
+        return EstimateGasDispatcher(evmConnector)
     }
 
     override fun gasPriceDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
-        return BesuGasPriceDispatcher(evmConnector)
+        return GasPriceDispatcher(evmConnector)
     }
 
     override fun getBalanceDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
-        return BesuGetBalanceDispatcher(evmConnector)
+        return GetBalanceDispatcher(evmConnector)
     }
 
     override fun getCodeDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
-        return BesuGetCodeDispatcher(evmConnector)
+        return GetCodeDispatcher(evmConnector)
     }
 
     override fun getTransactionByHashDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
-        return BesuGetTransactionByHashDispatcher(evmConnector)
+        return GetTransactionByHashDispatcher(evmConnector)
     }
 
     override fun getTransactionByReceiptDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
-        return BesuGetTransactionReceiptDispatcher(evmConnector)
+        return GetTransactionReceiptDispatcher(evmConnector)
     }
 
     override fun isSyncingDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
-        return BesuIsSyncingDispatcher(evmConnector)
+        return IsSyncingDispatcher(evmConnector)
     }
 
     override fun maxPriorityFeePerGasDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
@@ -53,7 +52,7 @@ object BesuDispatcherFactory : DispatcherFactory {
     }
 
     override fun sendRawTransactionDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
-        return BesuSendRawTransactionDispatcher(evmConnector)
+        return SendRawTransactionDispatcher(evmConnector)
     }
 
 }
