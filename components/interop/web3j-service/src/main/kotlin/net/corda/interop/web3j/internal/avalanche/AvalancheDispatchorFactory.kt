@@ -17,7 +17,7 @@ object AvalancheDispatcherFactory : DispatcherFactory {
     }
 
     override fun callDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
-        return AvalancheCallDispatcher(evmConnector)
+        return callDispatcher(evmConnector)
     }
 
     override fun estimateGasDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
