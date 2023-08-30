@@ -1,6 +1,6 @@
 package net.corda.flow.application.persistence.query
 
-import net.corda.flow.persistence.query.ResultSetExecutor
+import net.corda.flow.persistence.query.OffsetResultSetExecutor
 import net.corda.v5.application.serialization.SerializationService
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -14,22 +14,22 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import java.nio.ByteBuffer
 
-class ResultSetImplTest {
+class OffsetResultSetImplTest {
 
     private companion object {
         const val LIMIT = 10
         const val OFFSET = 0
         val serializedParameters = mapOf<String, ByteBuffer>("1" to ByteBuffer.wrap(byteArrayOf(1, 2, 3, 4)))
-        val resultExecutorResults = ResultSetExecutor.Results(
+        val resultExecutorResults = OffsetResultSetExecutor.Results(
             listOf(ByteBuffer.wrap(byteArrayOf(5, 6, 7, 8)), ByteBuffer.wrap(byteArrayOf(5, 6, 7, 8))),
             LIMIT
         )
     }
 
     private val serializationService = mock<SerializationService>()
-    private val resultSetExecutor = mock<ResultSetExecutor<Any>>()
+    private val resultSetExecutor = mock<OffsetResultSetExecutor<Any>>()
 
-    private val resultSet = ResultSetImpl(
+    private val resultSet = OffsetResultSetImpl(
         serializationService = serializationService,
         serializedParameters = serializedParameters,
         limit = LIMIT,
@@ -127,7 +127,7 @@ class ResultSetImplTest {
     @Test
     fun `next returns empty list when limit is 0`() {
         val resultSet = this.resultSet.copy(limit = 0)
-        whenever(resultSetExecutor.execute(serializedParameters, OFFSET)).thenReturn(ResultSetExecutor.Results(emptyList(), 0))
+        whenever(resultSetExecutor.execute(serializedParameters, OFFSET)).thenReturn(OffsetResultSetExecutor.Results(emptyList(), 0))
         assertThat(resultSet.next()).isEmpty()
     }
 }

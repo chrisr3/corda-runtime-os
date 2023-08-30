@@ -6,9 +6,9 @@ import java.io.Serializable
 import java.nio.ByteBuffer
 
 /**
- * [ResultSetExecutor] defines the database operation that is executed to retrieve data within [ResultSet.next].
+ * [StableResultSetExecutor] defines the database operation that is executed to retrieve data within [ResultSet.next].
  */
-fun interface ResultSetExecutor<R> : Serializable {
+fun interface StableResultSetExecutor<R> : Serializable {
 
     /**
      * Retrieve data for a [ResultSet].
@@ -19,7 +19,7 @@ fun interface ResultSetExecutor<R> : Serializable {
      * @return A [Results] containing the serialized results and the number of rows the database retrieved from its query.
      */
     @Suspendable
-    fun execute(serializedParameters: Map<String, ByteBuffer>, offset: Int): Results
+    fun execute(serializedParameters: Map<String, ByteBuffer>): Results
 
-    data class Results(val serializedResults: List<ByteBuffer>, val numberOfRowsFromQuery: Int)
+    data class Results(val serializedResults: List<ByteBuffer>)
 }
