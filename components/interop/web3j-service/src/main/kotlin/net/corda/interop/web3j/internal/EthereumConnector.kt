@@ -2,7 +2,6 @@ package net.corda.interop.web3j.internal
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import net.corda.v5.base.exceptions.CordaRuntimeException
-import java.util.concurrent.TimeUnit
 
 
 /**
@@ -18,7 +17,8 @@ class EthereumConnector(
 ) {
     companion object {
         private val objectMapper = ObjectMapper()
-        private const val maxLoopedRequests = 10
+
+        //        private const val maxLoopedRequests = 10
         private val expectedReturnTypes = mapOf(
             "eth_call" to JsonRpcResponse::class.java,
             "eth_chainId" to JsonRpcResponse::class.java,
@@ -54,14 +54,8 @@ class EthereumConnector(
      */
     private fun jsonStringContainsKey(jsonString: String, key: String): Boolean {
         return try {
-            // Regex to find the key
-//            val regex = """"$key":\s*""".toRegex()
             val tree = objectMapper.readTree(jsonString)
             tree.has(key)
-
-//            return
-//            // Check if the key is in the string
-//            regex.containsMatchIn(jsonString)
         } catch (e: Exception) {
             // Handle any parsing errors here
             false
@@ -90,8 +84,6 @@ class EthereumConnector(
      * @return The useful data extracted from the input as a string, or an empty string if not applicable.
      */
     private fun returnUsefulData(input: Any): String {
-        println("++++++++++++++=")
-        println(input is JsonRpcResponse)
         when (input) {
             is JsonRpcError -> {
                 throw EVMErrorException(input)
@@ -143,19 +135,11 @@ class EthereumConnector(
             responseBody,
             method
         )
-        println("Before actual parsed response")
-        println(method)
-        println(responseType)
-        println(responseBody)
         val actualParsedResponse = objectMapper.readValue(responseBody, responseType)
-        println("After actual parsed response")
         val usefulResponse = returnUsefulData(actualParsedResponse)
-        println("AFTER USEFUL Response $usefulResponse")
         if (usefulResponse == "null") {
             return performRequest(rpcUrl, method, params)
         }
-
-
         return Response(requestId, jsonRpcVersion, usefulResponse)
     }
 
@@ -170,6 +154,5 @@ class EthereumConnector(
     fun send(rpcUrl: String, method: String, params: List<*>): Response {
         return performRequest(rpcUrl, method, params)
     }
-
 
 }
