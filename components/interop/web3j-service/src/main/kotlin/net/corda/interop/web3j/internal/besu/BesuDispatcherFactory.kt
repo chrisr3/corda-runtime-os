@@ -52,7 +52,7 @@ object BesuDispatcherFactory : DispatcherFactory {
     }
 
     override fun sendRawTransactionDispatcher(evmConnector: EthereumConnector): EvmDispatcher {
-        return SendRawTransactionDispatcher(evmConnector)
+        return BesuSendRawTransactionDispatcher(evmConnector)
     }
 
 }

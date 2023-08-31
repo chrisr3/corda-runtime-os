@@ -9,7 +9,7 @@ import net.corda.data.interop.evm.EvmResponse
 interface EvmDispatcher {
     /**
      * Send an EVMRequest and retrieves an EVMResponse
-     *  @param evmRequest is a EVM Request defined in Corda API
+     *  @param evmRequest is an EVM Request defined in Corda API
      */
     fun dispatch(evmRequest: EvmRequest): EvmResponse
 }

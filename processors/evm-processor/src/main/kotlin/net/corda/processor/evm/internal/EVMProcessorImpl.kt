@@ -1,4 +1,4 @@
-package net.corda.processors.evm.internal
+package net.corda.processor.evm.internal
 
 import net.corda.processors.db.EVMProcessor
 import net.corda.libs.configuration.SmartConfig
@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory
 import net.corda.data.interop.evm.EvmRequest
 import net.corda.data.interop.evm.EvmResponse
 import net.corda.interop.web3j.internal.besu.BesuDispatcherFactory
-import net.corda.processor.evm.internal.EVMOpsProcessor
 import net.corda.schema.Schemas
 
 @Component(service = [EVMProcessor::class])

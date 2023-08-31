@@ -13,12 +13,12 @@ import java.math.BigInteger
 
 class AvalancheSendRawTransactionDispatcher(val evmConnector: EthereumConnector) : EvmDispatcher {
     companion object {
+        // These are the safe paramaters for supporting avalanche transactions
         private val avalancheGasLimit = BigInteger.valueOf(Numeric.toBigInt("0x47b760").toLong())
         private val avalancheMaxPriorityFeePerGas = BigInteger.valueOf(0)
         private val avalancheMaxFeePerGas = BigInteger.valueOf(515814755000)
         private const val transactionSigner = "0x8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63"
     }
-
 
     /**
      * Query the completion status of a contract using the Ethereum node.
@@ -45,9 +45,6 @@ class AvalancheSendRawTransactionDispatcher(val evmConnector: EthereumConnector)
 
         val chainId = evmConnector.send(evmRequest.rpcUrl, "eth_chainId", emptyList<String>())
         val parsedChainId = Numeric.toBigInt(chainId.result.toString()).toLong()
-
-//        val maxPriorityFeePerGas = evmConnector.send(evmRequest.rpcUrl, "eth_maxPriorityFeePerGas", emptyList<String>())
-
 
         val transaction = RawTransaction.createTransaction(
             parsedChainId,

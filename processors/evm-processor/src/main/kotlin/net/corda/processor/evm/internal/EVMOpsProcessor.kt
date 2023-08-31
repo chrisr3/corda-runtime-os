@@ -53,7 +53,7 @@ class EVMOpsProcessor
 
     init {
         val evmConnector = EthereumConnector(EvmRPCCall(OkHttpClient()))
-        dispatcher = mapOf<KClass<*>, EvmDispatcher>(
+        dispatcher = mapOf(
             GetBalance::class to factory.balanceDispatcher(evmConnector),
             Call::class to factory.callDispatcher(evmConnector),
             ChainId::class to factory.chainIdDispatcher(evmConnector),

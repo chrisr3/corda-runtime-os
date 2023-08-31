@@ -18,8 +18,8 @@ import java.math.BigInteger
  */
 class SendRawTransactionDispatcher(val evmConnector: EthereumConnector) : EvmDispatcher {
 
+    // Default Safe Max Fee Per Gas
     private val regularMaxFeePerGas = BigInteger.valueOf(515814755000)
-
 
     // This is used in absence of the crypto worker being able to sign these transactions for use
     private val temporaryPrivateKey = "0x8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63"
@@ -47,7 +47,6 @@ class SendRawTransactionDispatcher(val evmConnector: EthereumConnector) : EvmDis
             evmRequest.rpcUrl, "eth_getTransactionCount", listOf(evmRequest.from, "latest")
         )
         val nonce = BigInteger.valueOf(Integer.decode(transactionCountResponse.result.toString()).toLong())
-
         val chainId = evmConnector.send(evmRequest.rpcUrl, "eth_chainId", emptyList<String>())
         val parsedChainId = Numeric.toBigInt(chainId.result.toString()).toLong()
 
