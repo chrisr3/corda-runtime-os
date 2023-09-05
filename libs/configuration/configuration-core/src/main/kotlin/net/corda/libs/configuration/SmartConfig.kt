@@ -73,4 +73,7 @@ fun Config.getStringOrDefault(path: String, default: String): String {
     return default
 }
 
-
+fun Config.getIntOrDefault(path: String, default: Int): Int {
+    if(this.hasPath(path)) return this.getInt(path)
+    return default
+}
