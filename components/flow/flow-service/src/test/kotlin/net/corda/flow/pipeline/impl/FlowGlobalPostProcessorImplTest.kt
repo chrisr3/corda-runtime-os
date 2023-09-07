@@ -18,6 +18,7 @@ import net.corda.flow.external.events.impl.ExternalEventManager
 import net.corda.flow.pipeline.exceptions.FlowFatalException
 import net.corda.flow.pipeline.factory.FlowMessageFactory
 import net.corda.flow.pipeline.factory.FlowRecordFactory
+import net.corda.flow.pipeline.handlers.GlobalPostProcessingHandler
 import net.corda.flow.state.FlowCheckpoint
 import net.corda.flow.test.utils.buildFlowEventContext
 import net.corda.membership.read.MembershipGroupReader
@@ -111,12 +112,15 @@ class FlowGlobalPostProcessorImplTest {
     private val flowMessageFactory = mock<FlowMessageFactory>()
     private val checkpoint = mock<FlowCheckpoint>()
     private val testContext = buildFlowEventContext(checkpoint, Any())
+    private val globalPostProcessingHandler1 = mock<GlobalPostProcessingHandler>()
+    private val globalPostProcessingHandler2 = mock<GlobalPostProcessingHandler>()
     private val flowGlobalPostProcessor = FlowGlobalPostProcessorImpl(
         externalEventManager,
         sessionManager,
         flowMessageFactory,
         flowRecordFactory,
-        membershipGroupReaderProvider
+        membershipGroupReaderProvider,
+        listOf(globalPostProcessingHandler1, globalPostProcessingHandler2)
     )
 
     @Suppress("Unused")
@@ -171,6 +175,8 @@ class FlowGlobalPostProcessorImplTest {
         whenever(membershipGroupReaderProvider.getGroupReader(anyOrNull())).thenReturn(membershipGroupReader)
         whenever(membershipGroupReader.lookup(ALICE_X500_NAME)).thenReturn(mock())
         whenever(membershipGroupReader.lookup(BOB_X500_NAME)).thenReturn(null)
+        whenever(globalPostProcessingHandler1.postProcess(any())).thenReturn(listOf())
+        whenever(globalPostProcessingHandler2.postProcess(any())).thenReturn(listOf())
 
         setOf(sessionState1, sessionState2, sessionState3).forEach {
             it.sessionStartTime = Instant.now()
@@ -362,5 +368,20 @@ class FlowGlobalPostProcessorImplTest {
 
         verify(sessionManager, times(1)).errorSession(any())
         verify(checkpoint, times(0)).putSessionState(any())
+    }
+
+    @Test
+    fun `Calls global post processing handlers`() {
+
+        val record1 = Record("1","1","1")
+        val record2 = Record("2","2","2")
+
+        flowGlobalPostProcessor.postProcess(testContext)
+
+        verify(globalPostProcessingHandler1).postProcess(testContext)
+        verify(globalPostProcessingHandler2).postProcess(testContext)
+
+        assertThat(testContext.outputRecords).contains(record1)
+        assertThat(testContext.outputRecords).contains(record2)
     }
 }

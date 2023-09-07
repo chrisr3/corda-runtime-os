@@ -12,6 +12,8 @@ import net.corda.flow.pipeline.events.FlowEventContext
 import net.corda.flow.pipeline.exceptions.FlowFatalException
 import net.corda.flow.pipeline.factory.FlowMessageFactory
 import net.corda.flow.pipeline.factory.FlowRecordFactory
+import net.corda.flow.pipeline.handlers.GlobalPostProcessingHandler
+import net.corda.flow.pipeline.handlers.requests.FlowRequestHandler
 import net.corda.membership.read.MembershipGroupReaderProvider
 import net.corda.messaging.api.records.Record
 import net.corda.schema.configuration.FlowConfig.SESSION_FLOW_CLEANUP_TIME
@@ -21,26 +23,55 @@ import net.corda.v5.base.types.MemberX500Name
 import org.osgi.service.component.annotations.Activate
 import org.osgi.service.component.annotations.Component
 import org.osgi.service.component.annotations.Reference
+import org.osgi.service.component.annotations.ReferenceCardinality
+import org.osgi.service.component.annotations.ReferencePolicy
 import org.slf4j.LoggerFactory
 import java.time.Instant
 
 @Component(service = [FlowGlobalPostProcessor::class])
-class FlowGlobalPostProcessorImpl @Activate constructor(
-    @Reference(service = ExternalEventManager::class)
+@Suppress("LongParameterList")
+class FlowGlobalPostProcessorImpl(
     private val externalEventManager: ExternalEventManager,
-    @Reference(service = SessionManager::class)
     private val sessionManager: SessionManager,
-    @Reference(service = FlowMessageFactory::class)
     private val flowMessageFactory: FlowMessageFactory,
-    @Reference(service = FlowRecordFactory::class)
     private val flowRecordFactory: FlowRecordFactory,
-    @Reference(service = MembershipGroupReaderProvider::class)
     private val membershipGroupReaderProvider: MembershipGroupReaderProvider,
+    postProcessingHandlers: List<GlobalPostProcessingHandler>
 ) : FlowGlobalPostProcessor {
 
     private companion object {
         val log = LoggerFactory.getLogger(this::class.java.enclosingClass)
     }
+
+    // We cannot use constructor injection with DYNAMIC policy.
+    @Reference(
+        service = FlowRequestHandler::class,
+        cardinality = ReferenceCardinality.MULTIPLE,
+        policy = ReferencePolicy.DYNAMIC
+    )
+    private val postProcessingHandlers: List<GlobalPostProcessingHandler> = postProcessingHandlers
+
+    @Activate
+    @Suppress("Unused")
+    constructor(
+        @Reference(service = ExternalEventManager::class)
+        externalEventManager: ExternalEventManager,
+        @Reference(service = SessionManager::class)
+        sessionManager: SessionManager,
+        @Reference(service = FlowMessageFactory::class)
+        flowMessageFactory: FlowMessageFactory,
+        @Reference(service = FlowRecordFactory::class)
+        flowRecordFactory: FlowRecordFactory,
+        @Reference(service = MembershipGroupReaderProvider::class)
+        membershipGroupReaderProvider: MembershipGroupReaderProvider,
+    ) : this(
+        externalEventManager,
+        sessionManager,
+        flowMessageFactory,
+        flowRecordFactory,
+        membershipGroupReaderProvider,
+        mutableListOf()
+    )
 
     override fun postProcess(context: FlowEventContext<Any>): FlowEventContext<Any> {
         val now = Instant.now()
@@ -50,7 +81,8 @@ class FlowGlobalPostProcessorImpl @Activate constructor(
         val outputRecords = getSessionEvents(context, now) +
                 getFlowMapperSessionCleanupEvents(context, now) +
                 getExternalEvent(context, now) +
-                postProcessRetries(context)
+                postProcessRetries(context) +
+                postProcessingHandlers.flatMap { it.postProcess(context) }
 
         context.flowMetrics.flowEventCompleted(context.inputEvent.payload::class.java.name)
 
@@ -103,8 +135,9 @@ class FlowGlobalPostProcessorImpl @Activate constructor(
          * If the counterparty doesn't exist in our network, throw a [FlowPlatformException]
          */
         if (!counterpartyExists) {
-            val msg = "[${context.checkpoint.holdingIdentity.x500Name}] has failed to create a flow with counterparty: " +
-                    "[${counterparty}] as the recipient doesn't exist in the network."
+            val msg =
+                "[${context.checkpoint.holdingIdentity.x500Name}] has failed to create a flow with counterparty: " +
+                        "[${counterparty}] as the recipient doesn't exist in the network."
             sessionManager.errorSession(sessionState)
             if (doesCheckpointExist) {
                 log.debug { "$msg. Throwing FlowFatalException" }
